@@ -15,6 +15,7 @@ def split_text(text: str, max_chars: int = CHUNK_CHARS, overlap: int = CHUNK_OVE
     current = ""
 
     for para in paragraphs:
+        # A single paragraph bigger than the limit gets cut on its own.
         if len(para) > max_chars:
             if current:
                 chunks.append(current)
@@ -23,11 +24,13 @@ def split_text(text: str, max_chars: int = CHUNK_CHARS, overlap: int = CHUNK_OVE
                 chunks.append(para[i:i + max_chars])
             continue
 
+        # Does it still fit in the chunk we are building?
         if len(current) + len(para) + 2 <= max_chars:
             current = f"{current}\n\n{para}" if current else para
         else:
             chunks.append(current)
-           
+            # Carry the tail of the last chunk forward, so a fact that sits on
+            # the boundary appears in BOTH chunks and cannot be lost.
             tail = current[-overlap:] if overlap else ""
             current = f"{tail}\n\n{para}" if tail else para
 

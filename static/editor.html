@@ -3,249 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document Editor - OnlyOffice with Regex Inspector</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Document Editor</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; width: 100%; overflow: hidden; background: #1e1e2f; font-family: 'Inter', sans-serif; }
+    html, body { height: 100%; width: 100%; overflow: hidden; background: #444; }
     #placeholder { width: 100%; height: 100vh; }
-    
     #loading {
       position: fixed; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
-      color: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       z-index: 999;
     }
     .spinner {
       width: 48px; height: 48px;
-      border: 4px solid rgba(255,255,255,0.2);
-      border-top: 4px solid #6366f1;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white;
       border-radius: 50%;
       animation: spin 0.9s linear infinite;
       margin-bottom: 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    #loading p { font-size: 16px; font-weight: 500; color: #f8fafc; }
-    #loading small { font-size: 13px; color: #94a3b8; margin-top: 8px; }
-
-    /* Top Floating Action Bar */
-    .top-toolbar {
-      position: fixed;
-      top: 12px;
-      right: 20px;
-      z-index: 100;
-      display: flex;
-      gap: 10px;
-    }
-
-    .tool-btn {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(12px);
-      color: #f8fafc;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-
-    .tool-btn:hover {
-      background: #6366f1;
-      border-color: #6366f1;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-    }
-
-    /* Regex Inspector Drawer */
-    .inspector-drawer {
-      position: fixed;
-      top: 0;
-      right: -380px;
-      width: 380px;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(20px);
-      border-left: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 200;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-      transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      color: #f8fafc;
-      overflow-y: auto;
-    }
-
-    .inspector-drawer.open {
-      right: 0;
-    }
-
-    .drawer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .drawer-title {
-      font-size: 16px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .close-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      line-height: 1;
-    }
-    .close-btn:hover { color: white; background: rgba(255,255,255,0.1); }
-
-    .regex-card {
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 12px;
-    }
-
-    .regex-card b {
-      display: block;
-      color: #a5b4fc;
-      margin-bottom: 4px;
-      font-size: 13px;
-    }
-
-    .regex-pattern-box {
-      background: #090d16;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-family: monospace;
-      color: #38bdf8;
-      font-size: 11px;
-      word-break: break-all;
-      margin-top: 4px;
-    }
-
-    .scan-textarea {
-      width: 100%;
-      height: 100px;
-      background: #090d16;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      color: #f8fafc;
-      padding: 10px;
-      font-size: 12px;
-      outline: none;
-      resize: vertical;
-    }
-    .scan-textarea:focus { border-color: #6366f1; }
-
-    .btn-scan {
-      width: 100%;
-      padding: 10px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .btn-scan:hover { opacity: 0.9; }
-
-    .entity-tag {
-      display: inline-block;
-      background: rgba(99, 102, 241, 0.2);
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      color: #c7d2fe;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      margin: 2px 4px 2px 0;
-    }
+    #loading p { font-size: 16px; opacity: 0.9; }
+    #loading small { font-size: 12px; opacity: 0.6; margin-top: 8px; }
   </style>
 </head>
 <body>
-
-  <!-- Floating Navigation Toolbar -->
-  <div class="top-toolbar">
-    <a href="/" class="tool-btn">⬅ Back to Dashboard</a>
-    <button class="tool-btn" onclick="toggleInspector()">🔍 Regex Inspector</button>
-  </div>
-
-  <!-- Regex Inspector Side Drawer -->
-  <div class="inspector-drawer" id="inspectorDrawer">
-    <div class="drawer-header">
-      <div class="drawer-title">
-        <span>⚡</span> Regex Pattern Inspector
-      </div>
-      <button class="close-btn" onclick="toggleInspector()">✕</button>
-    </div>
-
-    <div class="regex-card">
-      <b>Defined Document Regex Patterns</b>
-      <div style="color: #94a3b8; font-size: 11px; margin-bottom: 6px;">Used to detect entities in documents:</div>
-      
-      <div style="margin-top: 6px;">
-        <span style="color: #e2e8f0;">👤 Name Pattern:</span>
-        <div class="regex-pattern-box">\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b</div>
-      </div>
-
-      <div style="margin-top: 6px;">
-        <span style="color: #e2e8f0;">📧 Email Pattern:</span>
-        <div class="regex-pattern-box">\b[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\b</div>
-      </div>
-
-      <div style="margin-top: 6px;">
-        <span style="color: #e2e8f0;">📞 Phone Pattern:</span>
-        <div class="regex-pattern-box">(?:\+?\d{1,4}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}\b</div>
-      </div>
-    </div>
-
-    <div style="display:flex; flex-direction: column; gap: 8px;">
-      <b style="font-size: 13px; color: #f8fafc;">Live Document Text Scanner:</b>
-      <textarea id="scanInput" class="scan-textarea" placeholder="Paste document content or text here to detect regex entities..."></textarea>
-      <button class="btn-scan" onclick="runLiveScan()">Detect Regex Patterns 🚀</button>
-    </div>
-
-    <div id="scanResults" style="display: none; flex-direction: column; gap: 10px;">
-      <b style="font-size: 13px; color: #10b981;">Detection Results:</b>
-      <div id="namesResult" class="regex-card">
-        <b>Names Found:</b>
-        <div id="namesList" style="color:#94a3b8; font-size:11px;">None</div>
-      </div>
-      <div id="emailsResult" class="regex-card">
-        <b>Emails Found:</b>
-        <div id="emailsList" style="color:#94a3b8; font-size:11px;">None</div>
-      </div>
-      <div id="phonesResult" class="regex-card">
-        <b>Phones Found:</b>
-        <div id="phonesList" style="color:#94a3b8; font-size:11px;">None</div>
-      </div>
-    </div>
-  </div>
-
   <div id="loading">
     <div class="spinner"></div>
     <p>Opening document in OnlyOffice…</p>
@@ -255,6 +39,7 @@
 
   <!-- OnlyOffice Document Editor API -->
   <script>
+    // Dynamically load api.js from current host or localhost
     const docServerHost = window.location.hostname || 'localhost';
     document.write('<script src="http://' + docServerHost + '/web-apps/apps/api/documents/api.js"><\/script>');
   </script>
@@ -268,42 +53,6 @@
     const key      = params.get('key') || Date.now().toString();
 
     document.getElementById('doc-name').textContent = fileName;
-
-    function toggleInspector() {
-      const drawer = document.getElementById('inspectorDrawer');
-      drawer.classList.toggle('open');
-    }
-
-    async function runLiveScan() {
-      const text = document.getElementById('scanInput').value.trim();
-      if (!text) return;
-      try {
-        const res = await fetch('/api/regex/detect', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
-        });
-        const data = await res.json();
-        
-        document.getElementById('scanResults').style.display = 'flex';
-        
-        document.getElementById('namesList').innerHTML = data.names.length ? 
-          data.names.map(n => `<span class="entity-tag">👤 ${escapeHtml(n)}</span>`).join('') : '<span style="color:#64748b;">No names found</span>';
-        
-        document.getElementById('emailsList').innerHTML = data.emails.length ? 
-          data.emails.map(e => `<span class="entity-tag">📧 ${escapeHtml(e)}</span>`).join('') : '<span style="color:#64748b;">No emails found</span>';
-        
-        document.getElementById('phonesList').innerHTML = data.phones.length ? 
-          data.phones.map(p => `<span class="entity-tag">📞 ${escapeHtml(p)}</span>`).join('') : '<span style="color:#64748b;">No phones found</span>';
-      } catch (e) {
-        alert('Regex detection failed: ' + e.message);
-      }
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
 
     if (!fileUrl) {
       document.getElementById('loading').innerHTML =
@@ -347,4 +96,3 @@
   </script>
 </body>
 </html>
-
