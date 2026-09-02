@@ -2,6 +2,4 @@
 __pycache__/
 .venv/
 *.pyc
-uploads/*
-!uploads/.gitkeep
-
+uploads/*.docx

@@ -3,752 +3,635 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact & Document Regex Form</title>
+  <title>Cyberify — Contact Form & OnlyOffice Pattern Integration</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #6366f1;
       --primary-hover: #4f46e5;
-      --primary-light: rgba(99, 102, 241, 0.12);
       --accent: #8b5cf6;
       --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.85);
-      --card-border: rgba(255, 255, 255, 0.1);
+      --card-bg: rgba(30, 41, 59, 0.8);
+      --card-border: rgba(255, 255, 255, 0.08);
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --success: #10b981;
-      --warning: #f59e0b;
       --danger: #ef4444;
+      --code-bg: rgba(15, 23, 42, 0.85);
       --radius: 16px;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at 20% 20%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 15% 15%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 30px 16px;
     }
 
     .container {
       width: 100%;
-      max-width: 1050px;
+      max-width: 640px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
     }
 
-    /* Top Navigation / Header */
-    .header {
+    /* Top Nav */
+    .nav-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      padding: 18px 26px;
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      padding: 12px 20px;
     }
 
-    .brand {
+    .nav-brand {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
     }
 
-    .logo-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+    .nav-brand span.logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       background: linear-gradient(135deg, var(--primary), var(--accent));
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      font-size: 16px;
     }
 
-    .brand h1 {
-      font-size: 20px;
+    .nav-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Card */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 30px 26px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+    }
+
+    .header-box {
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .header-box h1 {
+      font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.5px;
+      margin-bottom: 6px;
     }
 
-    .brand p {
-      font-size: 12px;
+    .header-box p {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Pattern Badges Summary Banner */
+    .patterns-banner {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .pattern-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-align: center;
+    }
+
+    .pattern-item .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .pattern-item span.desc {
+      font-size: 11px;
       color: var(--text-muted);
     }
 
-    .nav-links {
-      display: flex;
-      gap: 10px;
-    }
-
-    .nav-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--card-border);
-      color: #f8fafc;
-      text-decoration: none;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .nav-btn:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    /* Grid Layout */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-
-    @media (max-width: 860px) {
-      .grid-2 { grid-template-columns: 1fr; }
-    }
-
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 26px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .section-title {
-      font-size: 17px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Form Styles */
     .form-group {
+      margin-bottom: 18px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-bottom: 18px;
     }
 
-    .form-group label {
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .label-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label {
       font-size: 13px;
       font-weight: 600;
       color: #e2e8f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
 
-    .regex-badge {
+    .pattern-tag {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      padding: 2px 8px;
-      border-radius: 6px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+      border: 1px solid rgba(139, 92, 246, 0.3);
     }
 
-    .form-control {
+    .field-status {
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .field-status.valid { color: var(--success); }
+    .field-status.invalid { color: var(--danger); }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input {
       width: 100%;
-      padding: 13px 16px;
+      padding: 12px 16px;
+      padding-right: 40px;
       background: rgba(15, 23, 42, 0.7);
-      border: 1px solid var(--card-border);
+      border: 1.5px solid var(--card-border);
       border-radius: 10px;
-      color: white;
+      color: #fff;
       font-size: 14px;
       outline: none;
       transition: all 0.2s ease;
+      font-family: inherit;
     }
 
-    .form-control:focus {
+    input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
 
-    .form-control.valid {
-      border-color: var(--success);
-      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    input.valid {
+      border-color: rgba(16, 185, 129, 0.6);
+      background: rgba(16, 185, 129, 0.05);
     }
 
-    .form-control.invalid {
-      border-color: var(--danger);
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+    input.invalid {
+      border-color: rgba(239, 68, 68, 0.6);
+      background: rgba(239, 68, 68, 0.05);
     }
 
-    .field-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .field-hint.success { color: #34d399; }
-    .field-hint.error { color: #f87171; }
-
-    .btn-action {
-      width: 100%;
-      padding: 14px;
-      margin-top: 14px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: white;
-      border: none;
-      border-radius: 12px;
+    .icon-feedback {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
       font-size: 15px;
+      pointer-events: none;
+    }
+
+    .hint {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      transition: color 0.2s;
+    }
+
+    .hint.error {
+      color: #fca5a5;
+    }
+
+    /* Live Template Preview Box */
+    .template-box {
+      margin-top: 18px;
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #a5b4fc;
+    }
+
+    .template-content {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+    }
+
+    .template-content mark {
+      background: rgba(99, 102, 241, 0.35);
+      color: #fff;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button.btn-primary {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.25s;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+      transition: all 0.2s;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       gap: 8px;
     }
 
-    .btn-action:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    button.btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
     }
 
-    .btn-action:disabled {
-      opacity: 0.5;
+    button.btn-primary:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
-    .btn-sample {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-sample:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      font-size: 13px;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-    .checkbox-label input { accent-color: var(--primary); width: 16px; height: 16px; }
-
-    .status-msg {
-      margin-top: 14px;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      display: none;
-    }
-    .status-msg.info { display: block; background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
-    .status-msg.success { display: block; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
-    .status-msg.error { display: block; background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-
-    /* Entity Badges & Results */
-    .entity-section {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--card-border);
+    /* Alert Banner */
+    .alert-box {
+      margin-top: 18px;
+      padding: 16px;
       border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      display: none;
+      animation: fadeIn 0.3s ease;
     }
 
-    .entity-section-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #a5b4fc;
-      margin-bottom: 8px;
+    .alert-box.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+
+    .alert-box.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .success-card {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      font-size: 12.5px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .entity-pill {
-      display: inline-flex;
-      align-items: center;
+      flex-direction: column;
       gap: 6px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      margin: 2px 4px 2px 0;
-    }
-    .entity-pill.name-pill { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; }
-    .entity-pill.email-pill { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; }
-    .entity-pill.phone-pill { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; }
-
-    .office-card {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      border-radius: 14px;
-      padding: 18px;
-      text-align: center;
-      margin-top: 14px;
     }
 
-    .launch-btn {
+    .btn-onlyoffice {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
+      margin-top: 12px;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #fff;
+      font-weight: 600;
+      font-size: 13.5px;
+      border-radius: 8px;
       text-decoration: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 14px;
-      margin-top: 10px;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
       transition: all 0.2s;
     }
-    .launch-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+
+    .btn-onlyoffice:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(234, 88, 12, 0.45);
     }
 
-    .specs-box {
-      background: #090d16;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 14px;
-      margin-top: 16px;
-      font-size: 12px;
-    }
-
-    .regex-code {
-      font-family: 'JetBrains Mono', monospace;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.08);
-      padding: 2px 6px;
-      border-radius: 4px;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <div class="brand">
-        <div class="logo-icon">📋</div>
-        <div>
-          <h1>HTML Form with Regex & OnlyOffice Integration</h1>
-          <p>Submit Name, Email & Phone • Regex Document Entity Scanner • OnlyOffice Word Doc Generator</p>
-        </div>
-      </div>
-      <div class="nav-links">
-        <a href="/" class="nav-btn">🏠 Main Hub</a>
-        <button class="nav-btn" onclick="runBuiltInTests()">🧪 Test Regex</button>
-      </div>
-    </div>
+<div class="container">
 
-    <!-- Main Grid -->
-    <div class="grid-2">
-      <!-- Left: HTML Form -->
-      <div class="card">
-        <div class="section-title">
-          <span>📝 User Information Form</span>
-          <button type="button" class="btn-sample" onclick="loadSampleData()">⚡ Sample Data</button>
-        </div>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
-          Fill in the details below. All fields are validated with Regex patterns before submitting to <code>/api/submit</code>.
-        </p>
-
-        <form id="contactForm" onsubmit="submitForm(event)">
-          <!-- Name Field -->
-          <div class="form-group">
-            <label for="name">
-              <span>Full Name <span style="color:var(--danger)">*</span></span>
-              <span class="regex-badge">^[A-Za-z\s.-]{2,60}$</span>
-            </label>
-            <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Hamza Ali" required oninput="validateField('name')">
-            <div id="nameHint" class="field-hint">2-60 letters, spaces, dots or hyphens</div>
-          </div>
-
-          <!-- Email Field -->
-          <div class="form-group">
-            <label for="email">
-              <span>Email Address <span style="color:var(--danger)">*</span></span>
-              <span class="regex-badge">user@domain.com</span>
-            </label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="e.g. hamza@cyberify.ai" required oninput="validateField('email')">
-            <div id="emailHint" class="field-hint">Standard RFC-compliant email address</div>
-          </div>
-
-          <!-- Phone Number Field -->
-          <div class="form-group">
-            <label for="phone">
-              <span>Phone Number <span style="color:var(--danger)">*</span></span>
-              <span class="regex-badge">+92 / (###) ###-####</span>
-            </label>
-            <input type="text" id="phone" name="phone" class="form-control" placeholder="e.g. +92 300 1234567 or 0300-1234567" required oninput="validateField('phone')">
-            <div id="phoneHint" class="field-hint">Pakistani or international phone format</div>
-          </div>
-
-          <!-- Document Text / Attached Content -->
-          <div class="form-group">
-            <label for="document_text">
-              <span>Document Text / File Content (Regex Scan Target)</span>
-              <span class="regex-badge">Live Scan</span>
-            </label>
-            <textarea id="document_text" name="document_text" class="form-control" rows="4" placeholder="Paste or type document content. The system will scan and extract all Names, Emails, and Phone Numbers using Regex patterns..." oninput="triggerDocScan()"></textarea>
-            <div class="field-hint">Names, Emails, and Phones inside this text will be extracted automatically</div>
-          </div>
-
-          <!-- Notes -->
-          <div class="form-group">
-            <label for="notes">Notes / Remarks</label>
-            <input type="text" id="notes" name="notes" class="form-control" placeholder="Optional notes for the document">
-          </div>
-
-          <!-- Checkbox options -->
-          <label class="checkbox-label">
-            <input type="checkbox" id="createDoc" checked>
-            <span>Generate OnlyOffice Document (.docx) & Launch Editor</span>
-          </label>
-
-          <!-- Submit Button -->
-          <button type="submit" id="submitBtn" class="btn-action">
-            🚀 Submit Form & Detect Regex Entities
-          </button>
-        </form>
-
-        <div id="statusBox" class="status-msg"></div>
-      </div>
-
-      <!-- Right: Regex Analysis & OnlyOffice Results -->
-      <div class="card" style="display: flex; flex-direction: column;">
-        <div class="section-title">
-          <span>⚡ Regex Detection & Analysis Report</span>
-          <span id="detectedCountBadge" class="regex-badge" style="display: none;">0 Entities</span>
-        </div>
-
-        <div id="emptyState" style="text-align: center; color: var(--text-muted); padding: 30px 10px;">
-          <div style="font-size: 38px; margin-bottom: 10px;">🔍</div>
-          <p style="font-size: 14px; font-weight: 500; color: #cbd5e1;">Regex Scanner Waiting for Input</p>
-          <p style="font-size: 12px; margin-top: 6px;">Type above or click <b>"Sample Data"</b> to see real-time Regex entity extraction.</p>
-        </div>
-
-        <div id="resultsBox" style="display: none; flex-direction: column; flex: 1;">
-          <!-- Validation Status -->
-          <div class="entity-section" style="border-color: rgba(16, 185, 129, 0.3);">
-            <div class="entity-section-title" style="color: #6ee7b7;">
-              <span>✓ Form Validation Status</span>
-              <span style="font-size: 11px; color: #a7f3d0;">All Regex Checks Passed</span>
-            </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <span class="entity-pill" style="background: rgba(16, 185, 129, 0.2); color:#6ee7b7;">👤 Name: Valid</span>
-              <span class="entity-pill" style="background: rgba(16, 185, 129, 0.2); color:#6ee7b7;">📧 Email: Valid</span>
-              <span class="entity-pill" style="background: rgba(16, 185, 129, 0.2); color:#6ee7b7;">📞 Phone: Valid</span>
-            </div>
-          </div>
-
-          <!-- Detected Names -->
-          <div class="entity-section">
-            <div class="entity-section-title">
-              <span>👤 Detected Names in Document</span>
-              <span id="namesCount" style="font-size: 11px; color: var(--text-muted);">0 found</span>
-            </div>
-            <div id="namesList"><span style="font-size:12px; color:var(--text-muted);">None</span></div>
-          </div>
-
-          <!-- Detected Emails -->
-          <div class="entity-section">
-            <div class="entity-section-title">
-              <span>📧 Detected Emails in Document</span>
-              <span id="emailsCount" style="font-size: 11px; color: var(--text-muted);">0 found</span>
-            </div>
-            <div id="emailsList"><span style="font-size:12px; color:var(--text-muted);">None</span></div>
-          </div>
-
-          <!-- Detected Phones -->
-          <div class="entity-section">
-            <div class="entity-section-title">
-              <span>📞 Detected Phones in Document</span>
-              <span id="phonesCount" style="font-size: 11px; color: var(--text-muted);">0 found</span>
-            </div>
-            <div id="phonesList"><span style="font-size:12px; color:var(--text-muted);">None</span></div>
-          </div>
-
-          <!-- OnlyOffice Launch CTA -->
-          <div id="onlyOfficeCard" class="office-card" style="display: none;">
-            <b style="font-size: 15px; color: #f8fafc;">📄 OnlyOffice Document Ready!</b>
-            <p style="font-size: 12px; color: #cbd5e1; margin-top: 4px;" id="docFilenameLabel">Submission Document</p>
-            <a href="#" id="openEditorBtn" target="_blank" class="launch-btn">
-              Open in OnlyOffice Document Editor 🚀
-            </a>
-          </div>
-        </div>
-
-        <!-- Specifications Box -->
-        <div class="specs-box">
-          <b style="color: #f8fafc;">📐 Defined Regex Patterns:</b>
-          <div style="margin-top: 6px; line-height: 1.6; color: var(--text-muted);">
-            <div>• <b>Name:</b> <span class="regex-code">\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b</span></div>
-            <div>• <b>Email:</b> <span class="regex-code">\b[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}\b</span></div>
-            <div>• <b>Phone:</b> <span class="regex-code">(?:\+?\d{1,4}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}\b</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Top Navigation -->
+  <div class="nav-bar">
+    <a href="/" class="nav-brand">
+      <span class="logo">⚡</span>
+      <span>Cyberify</span>
+    </a>
+    <a href="/" class="nav-link">← Back to Hub & Chat</a>
   </div>
 
-  <script>
-    const API_BASE = window.location.origin || "http://127.0.0.1:8010";
-    let scanTimeout = null;
+  <!-- Main Card -->
+  <div class="card">
+    <div class="header-box">
+      <h1>Pattern Mapping & Contact Form</h1>
+      <p>Fill the form to validate fields against Regex patterns and open in <b>OnlyOffice Editor</b>.</p>
+    </div>
 
-    const REGEX = {
-      name: /^[A-Za-z\s.\-']{2,60}$/,
-      email: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/,
-      phone: /^(?:\+?\d{1,4}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}$/
+    <!-- Defined Patterns Summary Banner -->
+    <div class="patterns-banner">
+      <div class="pattern-item">
+        <span class="badge">{name}</span>
+        <span class="desc">Full Name Regex</span>
+      </div>
+      <div class="pattern-item">
+        <span class="badge">[email]</span>
+        <span class="desc">Email Regex</span>
+      </div>
+      <div class="pattern-item">
+        <span class="badge">(contact)</span>
+        <span class="desc">Phone/Contact Regex</span>
+      </div>
+    </div>
+
+    <form id="contactForm" novalidate>
+      <!-- Name Field: {name} -->
+      <div class="form-group">
+        <div class="label-row">
+          <div class="label-left">
+            <label for="name">Full Name</label>
+            <span class="pattern-tag">{name}</span>
+          </div>
+          <span class="field-status" id="nameStatus"></span>
+        </div>
+        <div class="input-wrapper">
+          <input id="name" type="text" placeholder="e.g. Ali Raza or Muhammad Hamza" autocomplete="name" required>
+          <span class="icon-feedback" id="nameIcon"></span>
+        </div>
+        <div class="hint" id="nameHint">Regex Rule: Letters & spaces only (e.g. Ali Raza).</div>
+      </div>
+
+      <!-- Email Field: [email] -->
+      <div class="form-group">
+        <div class="label-row">
+          <div class="label-left">
+            <label for="email">Email Address</label>
+            <span class="pattern-tag">[email]</span>
+          </div>
+          <span class="field-status" id="emailStatus"></span>
+        </div>
+        <div class="input-wrapper">
+          <input id="email" type="email" placeholder="e.g. ali.raza@example.com" autocomplete="email" required>
+          <span class="icon-feedback" id="emailIcon"></span>
+        </div>
+        <div class="hint" id="emailHint">Regex Rule: Standard format user@domain.com.</div>
+      </div>
+
+      <!-- Phone Field: (contact) -->
+      <div class="form-group">
+        <div class="label-row">
+          <div class="label-left">
+            <label for="phone">Phone / Contact</label>
+            <span class="pattern-tag">(contact)</span>
+          </div>
+          <span class="field-status" id="phoneStatus"></span>
+        </div>
+        <div class="input-wrapper">
+          <input id="phone" type="tel" placeholder="e.g. 0300-1234567 or +923001234567" autocomplete="tel" required>
+          <span class="icon-feedback" id="phoneIcon"></span>
+        </div>
+        <div class="hint" id="phoneHint">Regex Rule: Pakistani mobile 03001234567 / 0300-1234567 / +923001234567.</div>
+      </div>
+
+      <!-- Live Template Preview Box -->
+      <div class="template-box">
+        <div class="template-header">
+          <span>📄 Live Pattern Replacement Preview</span>
+          <span>OnlyOffice Ready</span>
+        </div>
+        <div class="template-content" id="previewText">Dear <mark>{name}</mark>, thank you for contacting Cyberify. Your email is recorded as <mark>[email]</mark> and your contact number is <mark>(contact)</mark>.</div>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <span>🚀 Submit & Open in OnlyOffice</span>
+        </button>
+      </div>
+
+      <div id="resultBox" class="alert-box"></div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+  // Defined Regex Patterns
+  const PATTERNS = {
+    name: /^[A-Za-z]+(?:[ \t.'-][A-Za-z]+)*$/,
+    email: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/,
+    phone: /^(?:\+92[\s-]?)?0?3\d{2}[\s-]?\d{7}$/
+  };
+
+  const fields = {
+    name: { el: document.getElementById("name"), hint: document.getElementById("nameHint"), status: document.getElementById("nameStatus"), icon: document.getElementById("nameIcon") },
+    email: { el: document.getElementById("email"), hint: document.getElementById("emailHint"), status: document.getElementById("emailStatus"), icon: document.getElementById("emailIcon") },
+    phone: { el: document.getElementById("phone"), hint: document.getElementById("phoneHint"), status: document.getElementById("phoneStatus"), icon: document.getElementById("phoneIcon") }
+  };
+
+  function updateLivePreview() {
+    const nameVal = fields.name.el.value.trim() || "{name}";
+    const emailVal = fields.email.el.value.trim() || "[email]";
+    const phoneVal = fields.phone.el.value.trim() || "(contact)";
+
+    const previewEl = document.getElementById("previewText");
+    previewEl.innerHTML = `Dear <mark>${nameVal}</mark>, thank you for contacting Cyberify. Your email is recorded as <mark>${emailVal}</mark> and your contact number is <mark>${phoneVal}</mark>.`;
+  }
+
+  function validateField(key) {
+    const field = fields[key];
+    const val = field.el.value.trim();
+
+    if (!val) {
+      field.el.classList.remove("valid", "invalid");
+      field.hint.classList.remove("error");
+      field.status.textContent = "";
+      field.icon.textContent = "";
+      updateLivePreview();
+      return false;
+    }
+
+    const isValid = PATTERNS[key].test(val);
+    if (isValid) {
+      field.el.classList.add("valid");
+      field.el.classList.remove("invalid");
+      field.hint.classList.remove("error");
+      field.status.textContent = "✓ Valid";
+      field.status.className = "field-status valid";
+      field.icon.textContent = "✓";
+      field.icon.style.color = "var(--success)";
+    } else {
+      field.el.classList.add("invalid");
+      field.el.classList.remove("valid");
+      field.hint.classList.add("error");
+      field.status.textContent = "✗ Invalid format";
+      field.status.className = "field-status invalid";
+      field.icon.textContent = "✗";
+      field.icon.style.color = "var(--danger)";
+    }
+
+    updateLivePreview();
+    return isValid;
+  }
+
+  // Bind live validation & preview
+  Object.keys(fields).forEach(key => {
+    fields[key].el.addEventListener("input", () => validateField(key));
+    fields[key].el.addEventListener("blur", () => validateField(key));
+  });
+
+  // Handle Form Submission
+  document.getElementById("contactForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const resultBox = document.getElementById("resultBox");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // Validate all fields
+    const isNameValid = validateField("name");
+    const isEmailValid = validateField("email");
+    const isPhoneValid = validateField("phone");
+
+    if (!isNameValid || !isEmailValid || !isPhoneValid) {
+      resultBox.className = "alert-box error";
+      resultBox.innerHTML = "⚠️ Please fix the highlighted fields with proper format before submitting.";
+      return;
+    }
+
+    const payload = {
+      name: fields.name.el.value.trim(),
+      email: fields.email.el.value.trim(),
+      phone: fields.phone.el.value.trim()
     };
 
-    function validateField(field) {
-      if (field === 'name') {
-        const val = document.getElementById('name').value.trim();
-        const el = document.getElementById('name');
-        const hint = document.getElementById('nameHint');
-        if (!val) {
-          el.className = 'form-control';
-          hint.className = 'field-hint';
-          hint.textContent = '2-60 letters, spaces, dots or hyphens';
-        } else if (REGEX.name.test(val)) {
-          el.className = 'form-control valid';
-          hint.className = 'field-hint success';
-          hint.textContent = '✓ Valid name format';
-        } else {
-          el.className = 'form-control invalid';
-          hint.className = 'field-hint error';
-          hint.textContent = '✗ Invalid name (letters and spaces only, min 2 chars)';
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "<span>Generating OnlyOffice Doc…</span>";
+    resultBox.style.display = "none";
+    resultBox.className = "alert-box";
+
+    try {
+      const res = await fetch("/api/submit-form", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        resultBox.className = "alert-box error";
+        resultBox.innerHTML = "❌ <b>Submission failed:</b> " + (data.detail?.message || "Validation error");
+      } else {
+        resultBox.className = "alert-box success";
+        resultBox.innerHTML = `
+          <div>🎉 <b>Form Submitted & Document Generated!</b> (Record ID: #${data.id})</div>
+          <div class="success-card">
+            <div><b>Pattern {name}:</b> ${data.data.name}</div>
+            <div><b>Pattern [email]:</b> ${data.data.email}</div>
+            <div><b>Pattern (contact):</b> ${data.data.phone}</div>
+          </div>
+          <a href="${data.onlyoffice_url}" target="_blank" class="btn-onlyoffice">
+            📝 Open Document in OnlyOffice Editor ➔
+          </a>
+        `;
+
+        // Automatically open OnlyOffice editor in a new tab
+        if (data.onlyoffice_url) {
+          window.open(data.onlyoffice_url, '_blank');
         }
-      } else if (field === 'email') {
-        const val = document.getElementById('email').value.trim();
-        const el = document.getElementById('email');
-        const hint = document.getElementById('emailHint');
-        if (!val) {
-          el.className = 'form-control';
-          hint.className = 'field-hint';
-          hint.textContent = 'Standard RFC-compliant email address';
-        } else if (REGEX.email.test(val)) {
-          el.className = 'form-control valid';
-          hint.className = 'field-hint success';
-          hint.textContent = '✓ Valid email address format';
-        } else {
-          el.className = 'form-control invalid';
-          hint.className = 'field-hint error';
-          hint.textContent = '✗ Invalid email format (e.g. user@example.com)';
-        }
-      } else if (field === 'phone') {
-        const val = document.getElementById('phone').value.trim();
-        const el = document.getElementById('phone');
-        const hint = document.getElementById('phoneHint');
-        if (!val) {
-          el.className = 'form-control';
-          hint.className = 'field-hint';
-          hint.textContent = 'Pakistani or international phone format';
-        } else if (REGEX.phone.test(val)) {
-          el.className = 'form-control valid';
-          hint.className = 'field-hint success';
-          hint.textContent = '✓ Valid phone number format';
-        } else {
-          el.className = 'form-control invalid';
-          hint.className = 'field-hint error';
-          hint.textContent = '✗ Invalid phone format (e.g. +92 300 1234567 or 0300-1234567)';
-        }
-      }
-    }
 
-    function loadSampleData() {
-      document.getElementById('name').value = "Hamza Ali";
-      document.getElementById('email').value = "hamza.ali@cyberify.ai";
-      document.getElementById('phone').value = "+92 300 9876543";
-      document.getElementById('notes').value = "Project stakeholder directory & verification document";
-      document.getElementById('document_text').value = 
-`PROJECT AGREEMENT & STAKEHOLDER DIRECTORY
------------------------------------------------------------
-Lead Project Manager : Sarah Johnson (sarah.johnson@techcorp.io, +1 415-555-0199)
-Senior Architect     : Usman Tariq (usman.tariq@cloudnet.pk, +92 321-4455667)
-Lead Auditor         : David Miller (dmiller@cyberaudit.org, +44 20 7946 0912)
-
-Please reach out to support at support@cyberify.ai or emergency hotline +92-300-1234567 for any verification.`;
-
-      validateField('name');
-      validateField('email');
-      validateField('phone');
-      triggerDocScan();
-    }
-
-    function triggerDocScan() {
-      clearTimeout(scanTimeout);
-      scanTimeout = setTimeout(async () => {
-        const text = document.getElementById('document_text').value.trim();
-        if (!text) return;
-        try {
-          const res = await fetch(`${API_BASE}/api/regex/detect`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text })
-          });
-          const data = await res.json();
-          renderEntities(data);
-        } catch (e) {
-          console.error(e);
-        }
-      }, 350);
-    }
-
-    function renderEntities(data) {
-      document.getElementById('emptyState').style.display = 'none';
-      document.getElementById('resultsBox').style.display = 'flex';
-
-      const total = (data.names ? data.names.length : 0) + 
-                    (data.emails ? data.emails.length : 0) + 
-                    (data.phones ? data.phones.length : 0);
-
-      const countBadge = document.getElementById('detectedCountBadge');
-      countBadge.style.display = 'inline-block';
-      countBadge.textContent = `${total} Entities Detected`;
-
-      // Names
-      document.getElementById('namesCount').textContent = `${data.names ? data.names.length : 0} found`;
-      document.getElementById('namesList').innerHTML = data.names && data.names.length ?
-        data.names.map(n => `<span class="entity-pill name-pill">👤 ${escapeHtml(n)}</span>`).join('') :
-        '<span style="font-size:12px; color:var(--text-muted);">None detected</span>';
-
-      // Emails
-      document.getElementById('emailsCount').textContent = `${data.emails ? data.emails.length : 0} found`;
-      document.getElementById('emailsList').innerHTML = data.emails && data.emails.length ?
-        data.emails.map(e => `<span class="entity-pill email-pill">📧 ${escapeHtml(e)}</span>`).join('') :
-        '<span style="font-size:12px; color:var(--text-muted);">None detected</span>';
-
-      // Phones
-      document.getElementById('phonesCount').textContent = `${data.phones ? data.phones.length : 0} found`;
-      document.getElementById('phonesList').innerHTML = data.phones && data.phones.length ?
-        data.phones.map(p => `<span class="entity-pill phone-pill">📞 ${escapeHtml(p)}</span>`).join('') :
-        '<span style="font-size:12px; color:var(--text-muted);">None detected</span>';
-    }
-
-    async function submitForm(e) {
-      e.preventDefault();
-
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const docText = document.getElementById('document_text').value.trim();
-      const notes = document.getElementById('notes').value.trim();
-      const createDoc = document.getElementById('createDoc').checked;
-
-      const submitBtn = document.getElementById('submitBtn');
-      const statusBox = document.getElementById('statusBox');
-
-      if (!REGEX.name.test(name)) {
-        alert("Please provide a valid Name (letters and spaces only, 2-60 chars).");
-        return;
-      }
-      if (!REGEX.email.test(email)) {
-        alert("Please provide a valid Email address.");
-        return;
-      }
-      if (!REGEX.phone.test(phone)) {
-        alert("Please provide a valid Phone number.");
-        return;
-      }
-
-      submitBtn.disabled = true;
-      statusBox.className = 'status-msg info';
-      statusBox.textContent = 'Submitting form, running regex analysis & generating OnlyOffice document…';
-
-      try {
-        const payload = {
-          name: name,
-          email: email,
-          phone: phone,
-          document_text: docText,
-          notes: notes,
-          create_onlyoffice_doc: createDoc
-        };
-
-        const res = await fetch(`${API_BASE}/api/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        document.getElementById("contactForm").reset();
+        Object.keys(fields).forEach(key => {
+          fields[key].el.classList.remove("valid", "invalid");
+          fields[key].status.textContent = "";
+          fields[key].icon.textContent = "";
         });
-
-        const data = await res.json();
-        if (!res.ok) {
-          const detail = data.detail;
-          const msg = typeof detail === 'object' && detail.message ? detail.message : (detail || 'Submission failed');
-          throw new Error(msg);
-        }
-
-        statusBox.className = 'status-msg success';
-        statusBox.textContent = '✓ Form successfully submitted! Regex pattern checks passed.';
-
-        if (data.detected_entities) {
-          renderEntities(data.detected_entities);
-        }
-
-        if (data.redirect_url) {
-          const card = document.getElementById('onlyOfficeCard');
-          const btn = document.getElementById('openEditorBtn');
-          const label = document.getElementById('docFilenameLabel');
-
-          card.style.display = 'block';
-          label.textContent = `Generated: ${data.document_filename}`;
-          btn.href = data.redirect_url;
-        }
-      } catch (err) {
-        statusBox.className = 'status-msg error';
-        statusBox.textContent = `❌ ${err.message || 'Submission error'}`;
-      } finally {
-        submitBtn.disabled = false;
+        updateLivePreview();
       }
+    } catch (err) {
+      resultBox.className = "alert-box error";
+      resultBox.innerHTML = "❌ <b>Network error:</b> Could not reach backend server.";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "<span>🚀 Submit & Open in OnlyOffice</span>";
     }
+  });
+</script>
 
-    async function runBuiltInTests() {
-      try {
-        const res = await fetch(`${API_BASE}/api/regex/test`);
-        const data = await res.json();
-        alert('Regex Test Suite Results:\n' + JSON.stringify(data.results, null, 2));
-      } catch (e) {
-        alert('Test failed: ' + e.message);
-      }
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-  </script>
 </body>
 </html>

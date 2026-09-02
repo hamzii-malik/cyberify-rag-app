@@ -32,3 +32,13 @@ CREATE TABLE IF NOT EXISTS chunks (
 -- With it, it only looks at the near neighbours. Same answers, far less work.
 CREATE INDEX IF NOT EXISTS chunks_embedding_idx
   ON chunks USING hnsw (embedding vector_cosine_ops);
+
+-- Contact form submissions (Name / Email / Phone), validated with regex
+-- patterns (app/patterns.py) before being written here.
+CREATE TABLE IF NOT EXISTS submissions (
+  id          SERIAL       PRIMARY KEY,
+  name        VARCHAR(150) NOT NULL,
+  email       VARCHAR(200) NOT NULL,
+  phone       VARCHAR(50)  NOT NULL,
+  created_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+);
