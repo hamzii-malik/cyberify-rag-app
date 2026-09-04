@@ -58,7 +58,7 @@ def test_compare_patterns_rejects_unknown_pattern():
 
 def test_validate_name():
     assert patterns.validate_field("name", "Ahmed Khan") is True
-    assert patterns.validate_field("name", "ahmed") is False        # single word
+    assert patterns.validate_field("name", "ahmed") is True         # same as the contact form
     assert patterns.validate_field("name", "Ahmed123") is False     # digits not allowed
     assert patterns.validate_field("name", "") is False
 
@@ -75,6 +75,33 @@ def test_validate_phone():
     assert patterns.validate_field("phone", "+923211234567") is True
     assert patterns.validate_field("phone", "12345") is False
     assert patterns.validate_field("phone", "02211234567") is False  # not a mobile prefix
+
+
+def test_extract_cv_fields():
+    fields = patterns.extract_cv_fields(
+        "Ali Raza\nEmail: ali@example.com\nSkills: Python, FastAPI\n"
+        "Education\nBS Computer Science"
+    )
+    by_key = {field["key"]: field for field in fields}
+    assert by_key["email"]["value"] == "ali@example.com"
+    assert by_key["skills"]["value"] == "Python, FastAPI"
+    assert by_key["email"]["validator"] == "email"
+    assert "@" in by_key["email"]["regex"]
+    assert by_key["skills"]["validator"] is None
+    assert by_key["education"]["type"] == "textarea"
+
+
+def test_validate_cv_fields_uses_contact_patterns():
+    errors = patterns.validate_cv_fields([
+        {"label": "Full Name", "key": "full_name", "value": "Ahmed Khan", "type": "text"},
+        {"label": "Email", "key": "email", "value": "not-an-email", "type": "email"},
+        {"label": "Skills", "key": "skills", "value": "Python", "type": "textarea"},
+    ])
+    assert errors == [{"label": "Email", "validator": "email"}]
+    assert patterns.validate_cv_fields([
+        {"label": "Email", "value": "ali@example.com", "type": "email"},
+        {"label": "Phone", "value": "03001234567", "type": "tel"},
+    ]) == []
 
 
 if __name__ == "__main__":

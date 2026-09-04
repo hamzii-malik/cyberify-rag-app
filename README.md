@@ -64,6 +64,11 @@ curl localhost:8000/api/health
 
 Then open http://localhost:8000 (chat page) and http://localhost:8000/docs (interactive API).
 
+For the dynamic CV workflow, open http://localhost:8000/cv-form. Upload a `.docx`,
+`.txt`, or `.md` CV, review the detected fields, and submit to open an editable
+DOCX in OnlyOffice. Set `APP_BASE_URL` and `INTERNAL_BASE_URL` to URLs reachable
+by the OnlyOffice container when running the document server outside localhost.
+
 ## Testing without spending anything
 
 The database half of RAG can be tested completely offline — only the two OpenAI

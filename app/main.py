@@ -2,9 +2,11 @@
 
 import hashlib
 import os
+import re
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
+from urllib.request import urlopen
 from uuid import uuid4
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -13,7 +15,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from app import db, ingest, patterns, rag
+from app import db, ingest, patterns, rag, signature
 from app.config import CHAT_MODEL, EMBEDDING_MODEL, TOP_K
 
 # Create uploads directory
@@ -35,7 +37,6 @@ api.add_middleware(
 )
 
 
-# ---------- Pydantic Models ----------
 class IngestTextRequest(BaseModel):
     title: str = Field(..., description="Document Title")
     source: str = Field(..., description="Source filename or identifier")
@@ -51,6 +52,8 @@ class ContactFormRequest(BaseModel):
     name: str = Field(..., description="Full name, e.g. Ali Raza")
     email: str = Field(..., description="Email address")
     phone: str = Field(..., description="Pakistani mobile number, e.g. 0300-1234567")
+    gender: str = Field(..., description="Gender: male or female")
+    signature_b64: Optional[str] = Field(default=None, description="Base64-encoded PNG of the candidate e-signature")
 
 
 class DetectTextRequest(BaseModel):
@@ -58,7 +61,11 @@ class DetectTextRequest(BaseModel):
     document_id: Optional[int] = Field(default=None, description="Scan an already-ingested document instead")
 
 
-# ---------- RAG Endpoints ----------
+class CVSubmitRequest(BaseModel):
+    title: str = Field(default="My CV", max_length=120)
+    fields: list[dict] = Field(..., min_length=1, max_length=50)
+
+
 @api.get("/api/health")
 def health():
     try:
@@ -152,17 +159,23 @@ def ask_question_endpoint(req: AskRequest):
 # ---------- Contact Form + Regex Pattern Detection ----------
 @api.post("/api/submit-form")
 def submit_form(req: ContactFormRequest):
-    """Validate the Name / Email / Phone fields with regex, then save the
-    submission. Returns per-field validation results; if any field fails
-    its pattern, the whole submission is rejected with a 400."""
+    """Validate the Name / Email / Phone / Gender fields with regex, then save
+    the submission along with an optional base64-encoded e-signature PNG.
+    Returns per-field validation results; if any field fails its pattern the
+    whole submission is rejected with a 400."""
     name = req.name.strip()
     email = req.email.strip()
     phone = req.phone.strip()
+    gender = req.gender.strip().lower()
 
+    # --- Field Regex Validation ---
     checks = {
         "name": patterns.validate_field("name", name),
         "email": patterns.validate_field("email", email),
         "phone": patterns.validate_field("phone", phone),
+        "gender": patterns.validate_field("gender", gender),
+        "signature": bool(req.signature_b64)
+        and patterns.validate_field("signature", req.signature_b64),
     }
 
     if not all(checks.values()):
@@ -171,10 +184,20 @@ def submit_form(req: ContactFormRequest):
             detail={"message": "One or more fields failed pattern validation.", "valid": checks},
         )
 
+    # --- Validate and save the e-signature PNG ---
+    sig_path: Path | None = None
+    sig_db_path: str | None = None
+    if req.signature_b64:
+        try:
+            sig_path, sig_db_path = signature.save_signature(req.signature_b64, UPLOAD_DIR)
+        except signature.SignatureError as e:
+            raise HTTPException(status_code=400, detail=f"Invalid signature image: {e}")
+
     try:
         row = db.execute(
-            "INSERT INTO submissions (name, email, phone) VALUES (%s, %s, %s) RETURNING id, created_at",
-            (name, email, phone),
+            "INSERT INTO submissions (name, email, phone, gender, signature_path) "
+            "VALUES (%s, %s, %s, %s, %s) RETURNING id, created_at",
+            (name, email, phone, gender, sig_db_path),
         )
         row_id = row["id"] if row else uuid4().hex[:6]
 
@@ -182,7 +205,11 @@ def submit_form(req: ContactFormRequest):
         original_name = f"Contact_Record_{row_id}_{name.replace(' ', '_')}.docx"
         saved_name = f"contact-{row_id}-{uuid4().hex[:8]}.docx"
         doc_path = UPLOAD_DIR / saved_name
-        patterns.create_contact_document(doc_path, name, email, phone)
+        patterns.create_contact_document(
+            doc_path, name, email, phone,
+            gender=gender,
+            signature_path=sig_path,
+        )
 
         onlyoffice_url = build_onlyoffice_url(saved_name, original_name)
     except Exception as e:
@@ -193,14 +220,16 @@ def submit_form(req: ContactFormRequest):
         "id": row["id"] if row else None,
         "created_at": str(row["created_at"]) if row else None,
         "valid": checks,
-        "data": {"name": name, "email": email, "phone": phone},
+        "data": {"name": name, "email": email, "phone": phone, "gender": gender},
         "patterns_defined": {
             "name_pattern": "{name}",
             "email_pattern": "[email]",
             "contact_pattern": "(contact)",
             "name_regex": r"^[A-Za-z]+(?:[ \t.'-][A-Za-z]+)*$",
             "email_regex": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
-            "contact_regex": r"(?:\+92[\s-]?)?0?3\d{2}[\s-]?\d{7}"
+            "contact_regex": r"(?:\+92[\s-]?)?0?3\d{2}[\s-]?\d{7}",
+            "gender_regex": r"^(?:male|female)$",
+            "signature_regex": r"^data:image/png;base64,[A-Za-z0-9+/]+={0,2}$",
         },
         "onlyoffice_url": onlyoffice_url
     }
@@ -224,6 +253,83 @@ def detect_patterns_endpoint(req: DetectTextRequest):
         raise HTTPException(status_code=400, detail="Provide either 'text' or 'document_id'")
 
     return patterns.detect_patterns(text)
+
+
+# ---------- Dynamic CV Form ----------
+@api.post("/api/cv/analyze")
+async def analyze_cv(file: UploadFile = File(...)):
+    """Extract editable fields from an uploaded CV template."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    suffix = Path(file.filename).suffix.lower()
+    if suffix not in (".docx", ".txt", ".md"):
+        raise HTTPException(status_code=400, detail="Upload a .docx, .txt, or .md CV")
+
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="File is empty")
+    temp_path = UPLOAD_DIR / f"_cv-{uuid4().hex}{suffix}"
+    temp_path.write_bytes(data)
+    try:
+        text = patterns.extract_text_from_file(temp_path)
+        fields = patterns.extract_cv_fields(text)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Could not read CV: {e}") from e
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+    return {
+        "filename": Path(file.filename).name,
+        "fields": fields,
+        "validators": patterns.validator_sources(),
+    }
+
+
+@api.post("/api/cv/submit")
+def submit_cv(req: CVSubmitRequest):
+    """Create the edited CV as DOCX and open it in OnlyOffice."""
+    clean_fields = []
+    for index, field in enumerate(req.fields):
+        label = str(field.get("label", "")).strip()[:80]
+        value = str(field.get("value", "")).strip()[:10000]
+        key = str(field.get("key", f"field_{index}")).strip()[:80]
+        field_type = str(field.get("type", "text")).strip()[:20]
+        if label and value:
+            validator = field.get("validator") or patterns.infer_cv_validator(label, key, field_type)
+            clean_fields.append({
+                "label": label,
+                "value": value,
+                "key": key,
+                "type": field_type,
+                "validator": validator,
+                "regex": patterns.cv_field_regex(validator),
+            })
+    if not clean_fields:
+        raise HTTPException(status_code=400, detail="Enter at least one CV field")
+
+    invalid = patterns.validate_cv_fields(clean_fields)
+    if invalid:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "One or more CV fields failed pattern validation.",
+                "invalid": invalid,
+            },
+        )
+
+    saved_name = f"cv-{uuid4().hex[:12]}.docx"
+    original_name = re.sub(r"[^A-Za-z0-9 _.-]", "", req.title).strip() or "My CV"
+    if not original_name.lower().endswith(".docx"):
+        original_name += ".docx"
+    try:
+        patterns.create_cv_document(UPLOAD_DIR / saved_name, clean_fields, Path(original_name).stem)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not create CV: {e}") from e
+    return {
+        "status": "saved",
+        "fields": clean_fields,
+        "onlyoffice_url": build_onlyoffice_url(saved_name, original_name),
+    }
 
 
 @api.post("/api/detect-patterns/file")
@@ -282,8 +388,25 @@ def build_onlyoffice_url(filename: str, original_name: str) -> str:
         f"&fileext={quote(Path(original_name).suffix)}"
         f"&url={quote(file_url)}"
         f"&documentType={_document_type(original_name)}"
+        f"&callbackUrl={quote(f'{APP_BASE_URL}/api/onlyoffice/callback/{quote(filename)}')}"
         f"&key={key}"
     )
+
+
+@api.post("/api/onlyoffice/callback/{filename}")
+async def onlyoffice_callback(filename: str, payload: dict):
+    """Persist the DOCX that OnlyOffice sends after a user saves it."""
+    status = payload.get("status")
+    download_url = payload.get("url")
+    if status in (2, 6) and download_url:
+        try:
+            with urlopen(download_url, timeout=30) as response:
+                data = response.read()
+            target = UPLOAD_DIR / Path(filename).name
+            target.write_bytes(data)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Could not save OnlyOffice document: {e}") from e
+    return {"error": 0}
 
 
 @api.post("/api/upload")
@@ -344,3 +467,8 @@ def home():
 @api.get("/form")
 def contact_form_page():
     return FileResponse("static/form.html")
+
+
+@api.get("/cv-form")
+def cv_form_page():
+    return FileResponse("static/cv-form.html")

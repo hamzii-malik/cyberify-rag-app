@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Forge | Cyberify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#17324d; --muted:#617489; --paper:#fff; --line:#d9e4ec; --blue:#1479a8; --mint:#dff4ed; --orange:#f18f55; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--ink); font-family:'DM Sans',sans-serif; background:linear-gradient(125deg,#f4fbf8,#f9f3e9 55%,#eef6fb); }
+    .shell { width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:28px 0 56px; }
+    .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:56px; }
+    .brand { display:flex; gap:11px; align-items:center; font-family:'Space Grotesk'; font-weight:700; letter-spacing:.02em; }
+    .mark { width:38px; height:38px; display:grid; place-items:center; color:white; background:var(--blue); border-radius:10px 10px 10px 3px; font-size:19px; }
+    .back { color:var(--muted); text-decoration:none; font-size:14px; }
+    .hero { max-width:710px; margin-bottom:34px; }
+    .eyebrow { color:var(--orange); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:12px; }
+    h1 { font:700 clamp(38px,6vw,68px)/.98 'Space Grotesk'; margin:12px 0 18px; letter-spacing:-.04em; }
+    .hero p { max-width:620px; color:var(--muted); font-size:17px; line-height:1.6; margin:0; }
+    .workspace { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr); gap:20px; align-items:start; }
+    .panel { background:rgba(255,255,255,.78); border:1px solid rgba(217,228,236,.9); border-radius:12px; box-shadow:0 18px 45px rgba(23,50,77,.08); padding:24px; }
+    .panel h2 { font:600 22px 'Space Grotesk'; margin:0 0 7px; }
+    .panel-intro { margin:0 0 22px; color:var(--muted); font-size:14px; line-height:1.5; }
+    .drop { border:1.5px dashed #94bdc8; background:linear-gradient(135deg,#f3fbf8,#f4f8fd); border-radius:10px; padding:30px 20px; text-align:center; cursor:pointer; transition:.2s; }
+    .drop:hover,.drop.drag { border-color:var(--blue); background:#eaf7f6; }
+    .upload-icon { font-size:30px; margin-bottom:10px; }
+    .drop strong { display:block; font-size:16px; }
+    .drop span { display:block; color:var(--muted); font-size:13px; margin-top:7px; }
+    input[type=file] { display:none; }
+    .file-name { color:var(--blue); font-size:13px; margin-top:14px; min-height:18px; }
+    .title-row { display:none; margin-top:20px; }
+    .title-row.visible { display:block; }
+    label { display:block; color:var(--muted); font-size:12px; font-weight:700; margin-bottom:7px; text-transform:uppercase; letter-spacing:.07em; }
+    input[type=text], textarea { width:100%; border:1px solid var(--line); border-radius:7px; padding:12px 13px; color:var(--ink); background:#fff; font:inherit; outline:none; }
+    input[type=text]:focus, textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(20,121,168,.11); }
+    .fields { display:none; margin-top:25px; }
+    .fields.visible { display:block; }
+    .field { margin-bottom:17px; }
+    textarea { min-height:92px; resize:vertical; line-height:1.5; }
+    .field-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .field-head label { margin:0 0 7px; text-transform:none; letter-spacing:0; color:var(--ink); font-size:14px; }
+    .kind { font-size:11px; color:#52846f; background:var(--mint); padding:4px 7px; border-radius:5px; }
+    button { border:0; border-radius:7px; cursor:pointer; font:600 14px 'DM Sans'; }
+    .primary { width:100%; margin-top:5px; padding:14px; color:#fff; background:var(--blue); box-shadow:0 7px 15px rgba(20,121,168,.2); }
+    .primary:hover { background:#0c638d; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .status { min-height:20px; color:var(--muted); font-size:13px; margin-top:14px; }
+    .status.error { color:#b54141; }
+    .status.ok { color:#34785c; }
+    input.valid, textarea.valid { border-color:#34785c; }
+    input.invalid, textarea.invalid { border-color:#b54141; }
+    .field-error { color:#b54141; font-size:12px; min-height:16px; margin-top:6px; }
+    .side { position:sticky; top:20px; }
+    .side-label { color:var(--orange); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; }
+    .side h3 { font:600 28px/1.1 'Space Grotesk'; margin:12px 0 15px; }
+    .side p { color:var(--muted); line-height:1.6; font-size:14px; }
+    .steps { border-top:1px solid var(--line); margin-top:25px; padding-top:18px; }
+    .step { display:flex; gap:12px; margin:15px 0; align-items:flex-start; font-size:14px; line-height:1.4; }
+    .num { flex:0 0 25px; height:25px; display:grid; place-items:center; border-radius:50%; background:var(--mint); color:#34785c; font-weight:700; font-size:12px; }
+    .count { color:var(--blue); font-weight:700; }
+    @media (max-width:760px) { .top { margin-bottom:38px; } .workspace { grid-template-columns:1fr; } .side { position:static; } .side h3 { font-size:24px; } .shell { width:min(100% - 22px,560px); padding-top:18px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav class="top"><a class="brand" href="/"><span class="mark">C</span><span>CYBERIFY / CV FORGE</span></a><a class="back" href="/">Back to hub</a></nav>
+    <section class="hero"><div class="eyebrow">Template to editable document</div><h1>Your CV, rebuilt as a form.</h1><p>Upload an existing CV and its labels, contact details, and sections become editable fields. Submit once and continue polishing the finished document in OnlyOffice.</p></section>
+    <section class="workspace">
+      <div class="panel">
+        <h2>Build your CV</h2><p class="panel-intro">Start with a Word document or text CV. We read headings and labelled lines automatically.</p>
+        <label class="drop" id="drop"><div class="upload-icon">↑</div><strong>Upload your CV file</strong><span>DOCX, TXT, or MD · click or drag here</span><input id="file" type="file" accept=".docx,.txt,.md"></label>
+        <div class="file-name" id="fileName"></div>
+        <div class="title-row" id="titleRow"><label for="title">Document title</label><input id="title" type="text" value="My CV" maxlength="120"></div>
+        <form class="fields" id="fields"><div id="fieldList"></div><button class="primary" id="submit" type="submit">Save and open in OnlyOffice ↗</button></form>
+        <div class="status" id="status" role="status"></div>
+      </div>
+      <aside class="panel side"><div class="side-label">A cleaner handoff</div><h3>From your format to a live CV.</h3><p>Every detected field remains editable before it becomes a real DOCX file. OnlyOffice then opens that file with editing enabled.</p><div class="steps"><div class="step"><span class="num">1</span><span>Upload your current CV template.</span></div><div class="step"><span class="num">2</span><span>Review and edit the detected <b class="count" id="count">0 fields</b>.</span></div><div class="step"><span class="num">3</span><span>Open the generated CV in OnlyOffice.</span></div></div></aside>
+    </section>
+  </main>
+<script>
+  const fileInput = document.getElementById('file');
+  const drop = document.getElementById('drop');
+  const status = document.getElementById('status');
+  const fieldForm = document.getElementById('fields');
+  const fieldList = document.getElementById('fieldList');
+  const submit = document.getElementById('submit');
+  let detectedFields = [];
+  let validatorSources = {};
+  ['dragenter','dragover'].forEach(type => drop.addEventListener(type, event => { event.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(type => drop.addEventListener(type, event => { event.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', event => { fileInput.files = event.dataTransfer.files; analyze(fileInput.files[0]); });
+  fileInput.addEventListener('change', () => analyze(fileInput.files[0]));
+  function setStatus(text, kind='') { status.textContent = text; status.className = `status ${kind}`; }
+  function detailMessage(result, fallback) {
+    const detail = result.detail;
+    if (!detail) return fallback;
+    if (typeof detail === 'string') return detail;
+    if (detail.message) return detail.message;
+    return fallback;
+  }
+  async function analyze(file) {
+    if (!file) return;
+    document.getElementById('fileName').textContent = file.name;
+    setStatus('Reading your CV…'); submit.disabled = true;
+    const body = new FormData(); body.append('file', file);
+    try {
+      const response = await fetch('/api/cv/analyze', { method:'POST', body });
+      const result = await response.json();
+      if (!response.ok) throw new Error(detailMessage(result, 'Could not read this file.'));
+      detectedFields = result.fields;
+      validatorSources = result.validators || {};
+      renderFields(detectedFields);
+      document.getElementById('titleRow').classList.add('visible'); fieldForm.classList.add('visible');
+      setStatus(`${detectedFields.length} editable fields found. Review them below.`, 'ok'); submit.disabled = false;
+    } catch (error) { setStatus(error.message, 'error'); fieldForm.classList.remove('visible'); document.getElementById('titleRow').classList.remove('visible'); }
+  }
+  function validateInput(field, input, errorEl) {
+    const value = input.value.trim();
+    detectedFields[Number(input.dataset.index)].value = value;
+    const validator = field.validator;
+    const source = field.regex || (validator ? validatorSources[validator] : '') || validatorSources.content;
+    const regex = source ? new RegExp(source.startsWith('^') ? source : `^${source}$`) : null;
+    if (!value) {
+      input.classList.remove('valid', 'invalid');
+      errorEl.textContent = 'This field is required.';
+      input.classList.add('invalid');
+      return false;
+    }
+    if (regex && !regex.test(value)) {
+      input.classList.add('invalid'); input.classList.remove('valid');
+      const hints = {
+        name: 'Use letters only (spaces, hyphen, apostrophe allowed).',
+        email: 'Enter a valid email such as name@company.com.',
+        phone: 'Use a Pakistani mobile number, e.g. 03001234567 or +92 300 1234567.',
+      };
+      errorEl.textContent = hints[validator] || 'This value does not match the expected pattern.';
+      return false;
+    }
+    input.classList.add('valid'); input.classList.remove('invalid');
+    errorEl.textContent = '';
+    return true;
+  }
+  function renderFields(fields) {
+    fieldList.replaceChildren(); document.getElementById('count').textContent = `${fields.length} field${fields.length === 1 ? '' : 's'}`;
+    fields.forEach((field, index) => {
+      const wrapper = document.createElement('div'); wrapper.className = 'field';
+      const head = document.createElement('div'); head.className = 'field-head';
+      const label = document.createElement('label'); label.htmlFor = `field-${index}`; label.textContent = field.label;
+      const kind = document.createElement('span'); kind.className = 'kind';
+      kind.textContent = field.validator || (field.type === 'textarea' ? 'section' : 'detected');
+      head.append(label, kind);
+      const input = field.type === 'textarea' ? document.createElement('textarea') : document.createElement('input');
+      input.id = `field-${index}`; input.value = field.value; input.dataset.index = index;
+      if (field.type !== 'textarea') input.type = field.type === 'tel' ? 'tel' : field.type === 'email' ? 'email' : 'text';
+      const errorEl = document.createElement('div'); errorEl.className = 'field-error';
+      input.addEventListener('input', () => validateInput(field, input, errorEl));
+      input.addEventListener('blur', () => validateInput(field, input, errorEl));
+      wrapper.append(head, input, errorEl); fieldList.append(wrapper);
+    });
+  }
+  fieldForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const inputs = [...fieldList.querySelectorAll('input, textarea')];
+    const allValid = inputs.every(input => {
+      const field = detectedFields[Number(input.dataset.index)];
+      const errorEl = input.parentElement.querySelector('.field-error');
+      return validateInput(field, input, errorEl);
+    });
+    if (!allValid) {
+      setStatus('Fix the highlighted fields before opening OnlyOffice.', 'error');
+      return;
+    }
+    submit.disabled = true; setStatus('Creating your editable CV…');
+    try {
+      const response = await fetch('/api/cv/submit', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title:document.getElementById('title').value, fields:detectedFields}) });
+      const result = await response.json(); if (!response.ok) throw new Error(detailMessage(result, 'Could not create the CV.'));
+      setStatus('CV ready. Opening OnlyOffice…', 'ok'); window.location.href = result.onlyoffice_url;
+    } catch (error) { setStatus(error.message, 'error'); submit.disabled = false; }
+  });
+</script>
+</body>
+</html>
